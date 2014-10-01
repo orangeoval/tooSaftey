@@ -39,4 +39,19 @@ $(document).ready(function() {
             }
         });
     });
+
+    //CHECK FOR SIGNAL THAT THE ALARM HAS GONE OFF
+    chrome.alarms.onAlarm.addListener(function(alarm) {
+	//CLEAR NOTICE
+        chrome.notifications.update(
+            alarm.name, 
+            {priority: -1}, 
+            function() {
+        });
+        //CLEAR ALARM
+        chrome.alarms.clear(
+            alarm.name, 
+            function(wasCleared) {
+        });
+    });
 });

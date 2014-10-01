@@ -29,9 +29,10 @@ function showNotification(id) {
         options,
         function(notificationID) {
             //HIDE NOTIFICATION AFTER 2 SECONDS
-            setTimeout( function(){
-                chrome.notifications.update(id, {priority: -1}, function(){});
-            }, 2000);
+            chrome.alarms.create(
+                id,
+                {delayInMinutes:0.02}
+            );
         }
     );
     //CLEAR NOTIFICATION SO WILL FIRE AGAIN WITHOUT HAVING TO CHECK
@@ -39,8 +40,9 @@ function showNotification(id) {
 }
 
 function clearNotification(id) {
-    chrome.notifications.clear(id, function(wasCleared) {
-        var wasCleared = wasCleared;
+    chrome.notifications.clear(
+        id, 
+        function(wasCleared) {
     });
 }
 
