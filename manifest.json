@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "TooSaftey",
+  "description": "Re-Route to https if available",
+  "version": "1.0",
+  "permissions": ["tabs", "<all_urls>", "notifications"],
+  "browser_action": {
+    "default_icon": "/img/icon_default.png",
+    "default_popup": "/html/popup.html"
+  },
+  "background": {"page": "/html/background.html"}
+}
