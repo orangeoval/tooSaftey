@@ -18,44 +18,58 @@ function redirectTab(redirectUrl) {
 }
 
 function showNotification(id) {
-    var options = {
-        type: 'basic',
-        iconUrl: '../img/icon_default.png',
-        title: 'TooSaftey',
-        message: 'redirecting through secure https...',
-    }
-    chrome.notifications.create(
-        id,
-        options,
-        function(notificationID) {
-            //HIDE NOTIFICATION AFTER 2 SECONDS
-            chrome.alarms.create(
-                id,
-                {delayInMinutes:0.02}
-            );
-        }
-    );
-    //CLEAR NOTIFICATION SO WILL FIRE AGAIN WITHOUT HAVING TO CHECK
+	chrome.storage.local.get('tcount', function(result) {
+		//Check redirect count, increment, and save
+		if (result.tcount == undefined) {
+			var totalRedirectCount = 1;
+		} else {
+			result.tcount++;
+			var totalRedirectCount = result.tcount;
+		}
+		chrome.storage.local.set({'tcount': totalRedirectCount});
+		//Create notification
+		var text = "redirecting through secure https\n";
+		var count = "total redirects: " + totalRedirectCount;
+		var options = {
+        	type: 'basic',
+        	iconUrl: '../img/icon_default.png',
+        	title: 'TooSaftey',
+        	message: text + count,
+    	}
+    	chrome.notifications.create(
+        	id,
+        	options,
+        	function(notificationID) {
+            	//Hide notification after 2 seconds
+            	chrome.alarms.create(
+                	id,
+                	{delayInMinutes:0.02}
+            	);
+        	}
+    	);
+	});
     clearNotification(id);
 }
 
 function clearNotification(id) {
     chrome.notifications.clear(
-        id, 
+        id,
         function(wasCleared) {
     });
 }
 
-function httpPopUp() {
+function httpPopUp(count) {
     $("#currentUrl").html('unencrypted connection');
-    $("#currentUrl").css("color", "red");
+    $("#totalRedirectCount").html('redirects to date: ' + count);
     $(".bodyBox").css('background-color', '#E0EEEE');
     $(".textBox").css('background-color', '#E0EEEE');
+    $(".textBox").css('color', "red");
 }
 
-function httpsPopUp() {
+function httpsPopUp(count) {
     $("#currentUrl").html('encrypted https connection');
-    $("#currentUrl").css('color', '#7FFFD4');
+    $("#totalRedirectCount").html('redirects to date: ' + count);
     $(".bodyBox").css('background-color', '#FFF8DC');
     $(".textBox").css('background-color', '#FFF8DC');
+    $(".textBox").css('color', '#00F90E');
 }

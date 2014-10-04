@@ -2,9 +2,15 @@ $(document).ready(function() {
     chrome.tabs.getSelected(null,function(tab) {
         var scheme = tab.url.split('://')[0];
         if (scheme == 'http' || scheme == 'chrome') {
-            httpPopUp();
+        	chrome.storage.local.get('tcount', function(result) {
+            	var count = result.tcount;
+            	httpPopUp(count);
+            });
         } else {
-            httpsPopUp();
+        	chrome.storage.local.get('tcount', function(result) {
+            	var count = result.tcount;
+            	httpsPopUp(count);
+            });
         }
     });
 });
