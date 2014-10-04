@@ -21,9 +21,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         		if (lastScheme == 'https:/' && lastPostScheme == currentPostScheme) {
         			chrome.tabs.executeScript(null,{code:"history.back()"});
         		} else {
-        			chrome.storage.local.set({'currentUrl': currentUrl});
-            		var secureUrl = currentUrl.replace(scheme, 'https://');
-            		if (isActiveLink(secureUrl)) {
+					chrome.storage.local.set({'currentUrl': currentUrl});
+					var secureUrl = currentUrl.replace(scheme, 'https://');
+					if (isActiveLink(secureUrl)) {
                 		redirectTab(secureUrl);
                 		showNotification('redirect');
                 	}
