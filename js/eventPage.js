@@ -30,6 +30,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         				//GO BACK TWICE IF HIT 'BACK' BUTTON ON PAGE
         				//THAT WAS JUST REDIRECTED BY tooSaftey
         				if (stored.tabs[i].scheme == 'https:/' && stored.tabs[i].postScheme == currentTab.postScheme) {
+        					stored.tabs.splice(stored.tabs[i],1);
+        					chrome.storage.local.set({'tabs': stored.tabs});
         					chrome.tabs.executeScript(null,{code:"history.back()"});
         					var matched = true;
         					break;
