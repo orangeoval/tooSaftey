@@ -1,34 +1,53 @@
 //FIRES FOR TAB REFRESH
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    var currentTab = new Object;
+    currentTab.id = tabId;
     if (changeInfo.status == "loading") {
         if (changeInfo.url == undefined) {
-            var currentUrl = tab.url;
+            currentTab.url = tab.url;
         } else {
-            var currentUrl = changeInfo.url;
+            currentTab.url = changeInfo.url;
         }
-        var scheme = currentUrl.substring(0,7);
-        if (scheme == "https:/") {
+        currentTab.scheme = currentTab.url.substring(0,7);
+        currentTab.postScheme = currentTab.url.split('//')[1];
+        if (currentTab.scheme == "https:/") {
             chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-            chrome.storage.local.set({'currentUrl': currentUrl});
+            chrome.storage.local.get({'tabs': []}, function(stored) {
+            	//REMOVE OLD INDEX FOR TAB RE: BACK FEATURE
+            	for (var i=0; i<stored.tabs.length; i++) {
+            		if (stored.tabs[i].id == currentTab.id) {
+            			stored.tabs.splice(stored.tabs[i],1);
+            		}
+            	}
+            	stored.tabs.push(currentTab);
+            	chrome.storage.local.set({'tabs': stored.tabs});
+            });
         } else {
         	chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
-        	chrome.storage.local.get('currentUrl', function(stored) {
-        		//GO BACK TWICE IF HIT 'BACK' BUTTON ON PAGE
-        		//THAT WAS JUST REDIRECTED BY tooSaftey
-        		var lastScheme = stored.currentUrl.substring(0,7);
-        		var lastPostScheme = stored.currentUrl.split('//')[1];
-        		var currentPostScheme = currentUrl.split('//')[1];
-        		if (lastScheme == 'https:/' && lastPostScheme == currentPostScheme) {
-        			chrome.tabs.executeScript(null,{code:"history.back()"});
-        		} else {
-				chrome.storage.local.set({'currentUrl': currentUrl});
-				var secureUrl = currentUrl.replace(scheme, 'https://');
-				if (isActiveLink(secureUrl)) {
-       		         		redirectTab(secureUrl);
-                			showNotification('redirect');
-                		}
+        	chrome.storage.local.get({'tabs': []}, function(stored) {
+        		for (var i=0; i<stored.tabs.length; i++) {
+        			if (stored.tabs[i].id == currentTab.id) {
+        				//GO BACK TWICE IF HIT 'BACK' BUTTON ON PAGE
+        				//THAT WAS JUST REDIRECTED BY tooSaftey
+        				if (stored.tabs[i].scheme == 'https:/' && stored.tabs[i].postScheme == currentTab.postScheme) {
+        					chrome.tabs.executeScript(null,{code:"history.back()"});
+        					var matched = true;
+        					break;
+        				}
+        			}
+        			var matched = false;
+        		}
+            	if (matched == false) {
+            		var secureUrl = currentTab.url.replace(currentTab.scheme, 'https://');
+            		if (isActiveLink(secureUrl)) {
+            			//FINALLY REDIRECT
+            			redirectTab(secureUrl);
+            			showNotification('redirect');
+            			stored.tabs.push(currentTab);
+            			chrome.storage.local.set({'tabs': stored.tabs});
             		}
-            	});
+            	}
+            });
         }
     }
 });
@@ -50,7 +69,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
             }
         }
     });
-});
+})
 
 //CHECK FOR SIGNAL THAT THE ALARM HAS GONE OFF
 chrome.alarms.onAlarm.addListener(function(alarm) {
