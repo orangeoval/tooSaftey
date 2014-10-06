@@ -13,7 +13,9 @@ function isActiveLink(link) {
 }
 
 function redirectTab(redirectUrl) {
-    chrome.tabs.update({ url: redirectUrl});
+    //chrome.tabs.update({ url: redirectUrl});
+    var command = 'window.location.replace("' + redirectUrl + '")';
+    chrome.tabs.executeScript(null,{code: command});
     chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
 }
 
