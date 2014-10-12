@@ -21,7 +21,6 @@ function validateTabRedirect(tab) {
 				checkHttps(tab, result.redirects);
 			} else {
 				//LOOP
-				alert("matched on " + result.redirects[tab.id] + '; ' + tab.id);
 				chrome.browserAction.setIcon({ path: '/img/icon_default.png' });
 				showNotification('loop');
 			}
