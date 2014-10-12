@@ -1,16 +1,76 @@
 $(document).ready(function() {
-    chrome.tabs.getSelected(null,function(tab) {
-        var scheme = tab.url.split('://')[0];
-        if (scheme == 'http' || scheme == 'chrome') {
-        	chrome.storage.local.get('tcount', function(result) {
-            	var count = result.tcount;
-            	httpPopUp(count);
-            });
-        } else {
-        	chrome.storage.local.get('tcount', function(result) {
-            	var count = result.tcount;
-            	httpsPopUp(count);
-            });
-        }
-    });
+	var excludebutton = $('a#exclude_button');
+	var showexcludelist = $('#exclusion_list_button');
+	var list = $('div.exclude_list');
+	var items = '';
+	var query = {active: true, currentWindow: true};
+	chrome.tabs.query(query, function(tabs) {
+		var id = tabs[0].id;
+		var scheme = tabs[0].url.split('://')[0];
+		var host = tabs[0].url.split('/')[2];
+		chrome.storage.local.get(['tcount', 'exclusions'], function(result) {
+			//DETERMINE WHICH POPUP
+			var count = result.tcount;
+			if (scheme == 'http' || scheme == 'chrome') {
+				httpPopUp(count, id);
+			} else {
+				httpsPopUp(count, id);
+			}
+
+			//GET EXCLUSION LIST FROM STORAGE
+			if (result.exclusions == undefined) {
+				exclusion_list = new Array;
+			} else {
+				exclusion_list = result.exclusions.sort();
+			}
+
+			//CHECK IF CURRENT TAB HOST IS ALREADY EXCLUDED
+			if (exclusion_list.indexOf(host) === -1) {
+				can_exclude = true;
+			} else {
+				can_exclude = false;
+				excludebutton.html('<i>[host excluded]</i>');
+			}
+
+			//ADD EXCLUSION BUTTON PRESSED
+			excludebutton.click(function() {
+				if (can_exclude) {
+					chrome.browserAction.setIcon({ path: '/img/icon_exclude.gif' });
+					exclusion_list.push(host);
+					exclusion_list.sort();
+					chrome.storage.local.set({'exclusions': exclusion_list});
+					excludebutton.html('<i>[host excluded]</i>');
+					can_exclude = false;
+					return false;
+				}
+			});
+
+
+			//SHOW EXCLUSION LIST BUTTON PRESSED
+			showexcludelist.click(function() {
+				var action = showexcludelist.attr('action');
+				if (action == 'show') {
+					showexcludelist.html("hide exclusion list");
+					showexcludelist.attr('action', 'hide');
+					if (exclusion_list.length === 0) {
+						items = '<i>(none)</i><br>';
+					} else {
+						for (var i=0; i<exclusion_list.length; i++) {
+							items += '<i>' + exclusion_list[i] + '</i><br>';
+						}
+					}
+					list.html(items).css('border', '1px solid');
+					items = '';
+					list.show();
+					return false;
+				} else {
+					showexcludelist.html("show exclusion list");
+					showexcludelist.attr('action', 'show');
+					list.hide();
+					return false;
+				}
+			});
+
+		});
+	});
 });

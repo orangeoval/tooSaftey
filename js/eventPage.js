@@ -1,44 +1,21 @@
-
 //FIRES FOR TAB REFRESH
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == "loading") {
+        var current = new Object;
         if (changeInfo.url == undefined) {
-            currentUrl = tab.url;
+            var current = new Tabject(tabId, tab.url);
         } else {
-            currentUrl = changeInfo.url;
+            var current = new Tabject(tabId, changeInfo.url);
         }
-        var scheme = currentUrl.substring(0,7);
-        if (scheme == "https:/") {
-            chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-        } else {
-            chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
-            var secureUrl = currentUrl.replace(scheme, 'https://');
-            if (isActiveLink(secureUrl)) {
-                //MIMIC BROWSER REDIRECT
-                redirectTab(secureUrl);
-                showNotification('redirect');
-            }
-        }
+        validateTabRedirect(current);
     }
 });
 
 //FIRES WHEN CHANGE TABS && WHEN TYPE URL IN NEW BLANK TAB
 chrome.tabs.onActivated.addListener(function(activeInfo) {
     chrome.tabs.get(activeInfo.tabId, function(tab) {
-        currentUrl = tab.url;
-        var scheme = currentUrl.substring(0,7);
-        if (scheme == "https:/") {
-            chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-        } else {
-            var secureUrl = currentUrl.replace(scheme, 'https://');
-            if (isActiveLink(secureUrl)) {
-            	//MIMIC BROWSER REDIRECT
-                redirectTab(secureUrl);
-                showNotification('redirect');
-            } else {
-                chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
-            }
-        }
+        var current = new Tabject(tab.id, tab.url);
+        validateTabRedirect(current);
     });
 });
 
@@ -48,11 +25,11 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
     chrome.notifications.update(
         alarm.name,
         {priority: -1},
-        function() {
-    });
+        function() {}
+    );
     //CLEAR ALARM
     chrome.alarms.clear(
         alarm.name,
-        function(wasCleared) {
-    });
+        function(wasCleared) {}
+    );
 });

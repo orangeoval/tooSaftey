@@ -2,6 +2,7 @@ body {
   min-width: 173px;
   text-align: center;
   overflow-x: hidden;
+  background-color: #FFF8DC
 }
 
 img {
@@ -12,3 +13,20 @@ img {
   height: 75px;
 }
 
+span.http {
+  color: red;
+}
+
+span.https {
+  color: #00F90E;
+}
+
+.info {
+  color: gray;
+}
+
+#exclude_button,
+#exclusion_list_button {
+  outline: 0;
+  color: #3399FF;
+}
