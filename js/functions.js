@@ -13,7 +13,7 @@ function validateTabRedirect(tab) {
 		} else if (tab.scheme == 'https:') {
 			//VALID HTTPS
 			chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-			result.redirects.splice(tab.id, 1);
+			delete result.redirects[tab.id];
 			chrome.storage.local.set({'redirects': result.redirects});
 		} else {
 			chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
