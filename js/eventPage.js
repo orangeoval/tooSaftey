@@ -1,7 +1,6 @@
 //FIRES FOR TAB REFRESH
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == "loading") {
-        var current = new Object;
         if (changeInfo.url == undefined) {
             var current = new Tabject(tabId, tab.url);
         } else {

@@ -5,16 +5,17 @@ $(document).ready(function() {
 	var items = '';
 	var query = {active: true, currentWindow: true};
 	chrome.tabs.query(query, function(tabs) {
-		var id = tabs[0].id;
-		var scheme = tabs[0].url.split('://')[0];
-		var host = tabs[0].url.split('/')[2];
+		var current = new Tabject(tabs[0].id, tabs[0].url);
 		chrome.storage.local.get(['tcount', 'exclusions'], function(result) {
+			if (chrome.runtime.lastError) {
+                        	alert("get error3 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
+                	}
 			//DETERMINE WHICH POPUP
 			var count = result.tcount;
-			if (scheme == 'http' || scheme == 'chrome') {
-				httpPopUp(count, id);
+			if (current.scheme != 'https:') {
+				httpPopUp(count, current.id);
 			} else {
-				httpsPopUp(count, id);
+				httpsPopUp(count, current.id);
 			}
 
 			//GET EXCLUSION LIST FROM STORAGE
@@ -25,7 +26,7 @@ $(document).ready(function() {
 			}
 
 			//CHECK IF CURRENT TAB HOST IS ALREADY EXCLUDED
-			if (exclusion_list.indexOf(host) === -1) {
+			if (exclusion_list.indexOf(current.host) === -1) {
 				can_exclude = true;
 			} else {
 				can_exclude = false;
@@ -36,7 +37,7 @@ $(document).ready(function() {
 			excludebutton.click(function() {
 				if (can_exclude) {
 					chrome.browserAction.setIcon({ path: '/img/icon_exclude.gif' });
-					exclusion_list.push(host);
+					exclusion_list.push(current.host);
 					exclusion_list.sort();
 					chrome.storage.local.set({'exclusions': exclusion_list});
 					excludebutton.html('<i>[host excluded]</i>');

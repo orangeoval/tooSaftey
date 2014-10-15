@@ -7,6 +7,9 @@ function Tabject(id, url) {
 
 function validateTabRedirect(tab) {
 	chrome.storage.local.get(['redirects', 'exclusions'], function(result) {
+		if (chrome.runtime.lastError) {
+			alert("get error1 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
+		}
 		if (result.exclusions != undefined && result.exclusions.indexOf(tab.host) !== -1) {
 			//HAS BEEN EXCLUDED
 			chrome.browserAction.setIcon({ path: '/img/icon_exclude.gif' });
@@ -21,7 +24,7 @@ function validateTabRedirect(tab) {
 				checkHttps(tab, result.redirects);
 			} else {
 				//LOOP
-				chrome.browserAction.setIcon({ path: '/img/icon_default.png' });
+				chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
 				showNotification('loop');
 			}
 		}
@@ -40,7 +43,6 @@ function checkHttps(tab, redirects) {
 				redirects[tab.id] = tab.host;
 				chrome.storage.local.set({'redirects': redirects});
 				redirectTabThroughHttps(tab.secureUrl, tab.id);
-				showNotification('redirect');
             }
         }
         /*DEBUG BAG PROBLEMATIC URLS
@@ -66,14 +68,27 @@ function checkHttps(tab, redirects) {
 }
 
 function redirectTabThroughHttps(redirectUrl, tabId) {
-	var command = 'window.location.replace("' + redirectUrl + '")';
-	chrome.tabs.executeScript(tabId,{code: command});
-	chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
+	chrome.tabs.get(tabId, function(tab) {
+		//REDIRECT TAB ONLY IF STILL ON SAME URL
+		if (tab.url == redirectUrl.replace('https:', 'http:')) {
+			var command = 'window.location.replace("' + redirectUrl + '")';
+			chrome.tabs.executeScript(tabId,{code: command}, function(result) {
+				if (chrome.runtime.lastError) {
+                        		alert("error2, tab probably closed [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
+                		}
+			});
+			chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
+			showNotification('redirect');
+		}
+	});
 }
 
 function showNotification(id) {
 	chrome.storage.local.get('tcount', function(result) {
 		//Get redirect count, increment if appropriate
+		if (chrome.runtime.lastError) {
+                        alert("get error2 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
+                }
 		if (result.tcount == undefined) {
 			var totalRedirectCount = 1;
 		} else {
