@@ -7,22 +7,23 @@ $(document).ready(function() {
 	chrome.tabs.query(query, function(tabs) {
 		var current = new Tabject(tabs[0].id, tabs[0].url);
 		chrome.storage.local.get(['tcount', 'exclusions'], function(result) {
-			if (chrome.runtime.lastError) {
-                        	alert("get error3 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
-                	}
-			//DETERMINE WHICH POPUP
-			var count = result.tcount;
-			if (current.scheme != 'https:') {
-				httpPopUp(count, current.id);
+			if (result.tcount == undefined) {
+				var count = 0;
 			} else {
-				httpsPopUp(count, current.id);
+				var count = result.tcount;
 			}
 
-			//GET EXCLUSION LIST FROM STORAGE
 			if (result.exclusions == undefined) {
 				exclusion_list = new Array;
 			} else {
 				exclusion_list = result.exclusions.sort();
+			}
+
+			//DETERMINE WHICH POPUP NOTIFICATION
+			if (current.scheme != 'https:') {
+				httpPopUp(count, current.id);
+			} else {
+				httpsPopUp(count, current.id);
 			}
 
 			//CHECK IF CURRENT TAB HOST IS ALREADY EXCLUDED

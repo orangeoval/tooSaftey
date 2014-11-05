@@ -12,10 +12,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 //FIRES WHEN CHANGE TABS && WHEN TYPE URL IN NEW BLANK TAB
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-    chrome.tabs.get(activeInfo.tabId, function(tab) {
-        var current = new Tabject(tab.id, tab.url);
-        validateTabRedirect(current);
-    });
+    if (activeInfo != undefined) {
+        chrome.tabs.get(activeInfo.tabId, function(tab) {
+            if (tab != undefined) {
+            	var current = new Tabject(tab.id, tab.url);
+       	    	validateTabRedirect(current);
+            }
+        });
+    }
 });
 
 //CHECK FOR SIGNAL THAT THE ALARM HAS GONE OFF

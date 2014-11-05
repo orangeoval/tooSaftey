@@ -7,21 +7,30 @@ function Tabject(id, url) {
 
 function validateTabRedirect(tab) {
 	chrome.storage.local.get(['redirects', 'exclusions'], function(result) {
-		if (chrome.runtime.lastError) {
-			alert("get error1 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
+		if (result.redirects == undefined) {
+			redirects = new Array();
+		} else {
+			redirects = result.redirects;
 		}
-		if (result.exclusions != undefined && result.exclusions.indexOf(tab.host) !== -1) {
+
+		if (result.exclusions == undefined) {
+			exclusions = new Array();
+		} else {
+			exclusions = result.exclusions;
+		}
+
+		if (exclusions.indexOf(tab.host) !== -1) {
 			//HAS BEEN EXCLUDED
 			chrome.browserAction.setIcon({ path: '/img/icon_exclude.gif' });
 		} else if (tab.scheme == 'https:') {
 			//VALID HTTPS
 			chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-			delete result.redirects[tab.id];
-			chrome.storage.local.set({'redirects': result.redirects});
+			delete redirects[tab.id];
+			chrome.storage.local.set({'redirects': redirects});
 		} else {
 			chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
-			if (result.redirects == undefined || result.redirects[tab.id] != tab.host) {
-				checkHttps(tab, result.redirects);
+			if (redirects[tab.id] != tab.host) {
+				checkHttps(tab, redirects);
 			} else {
 				//LOOP
 				chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
@@ -36,9 +45,7 @@ function checkHttps(tab, redirects) {
         url: tab.secureUrl,
         statusCode: {
             200: function() {
-				if (redirects == undefined) {
-					redirects = new Array();
-				}
+
 				//KEEP TRACK OF REDIRECT TO AVOID HTTPS->HTTP LOOP
 				redirects[tab.id] = tab.host;
 				chrome.storage.local.set({'redirects': redirects});
@@ -73,12 +80,9 @@ function redirectTabThroughHttps(redirectUrl, tabId) {
 		if (tab.url == redirectUrl.replace('https:', 'http:')) {
 			var command = 'window.location.replace("' + redirectUrl + '")';
 			chrome.tabs.executeScript(tabId,{code: command}, function(result) {
-				if (chrome.runtime.lastError) {
-                        		alert("error2, tab probably closed [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
-                		}
+				chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
+				showNotification('redirect');
 			});
-			chrome.browserAction.setIcon({ path: '/img/icon_green.gif' });
-			showNotification('redirect');
 		}
 	});
 }
@@ -86,9 +90,6 @@ function redirectTabThroughHttps(redirectUrl, tabId) {
 function showNotification(id) {
 	chrome.storage.local.get('tcount', function(result) {
 		//Get redirect count, increment if appropriate
-		if (chrome.runtime.lastError) {
-                        alert("get error2 [REDIR:" + result.redirects + ";EXCLU:" + result.exclusions + "]");
-                }
 		if (result.tcount == undefined) {
 			var totalRedirectCount = 1;
 		} else {
