@@ -66,11 +66,9 @@ $(document).ready(function() {
                     excludebutton.html('<i>[host excluded]</i>');
                     can_exclude = false;
     
-                    // Redirect back to http
-                    //alert("BLAH: " + current.http_url);
+                    // Redirect back to http version of site
                     command = 'window.location.replace("' + current.http_url + '")';
                     chrome.tabs.executeScript(current.id,{code: command}, function(result) {});
-
                     return false;
                 }
 
