@@ -8,12 +8,14 @@
     <script src="../js/popup.js" type="text/javascript"></script>
   </head>
   <body>
+    <input type="checkbox" id="showNotices" name="showNotices">
+    <label for="showNotices">Show notices</label><br>
     <span id="status"></span><br>
     <span class="info">
       redirects to date: <span id="count"></span><br>
       <a id="exclude_button" action="" href="#">exclude this host</a><br>
       <a id="exclusion_list_button" action="show" href="#">show exclusion list</a><br>
-      [TID:<span id="tabid"></span>]<br>
+      <!--[TID:<span id="tabid"></span>]<br>-->
       <div class="exclude_list"></div>
     </span>
   </body>

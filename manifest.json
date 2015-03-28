@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "TooSaftey",
+    "name": "tooSaftey",
     "description": "Re-Route to https if available",
     "version": "1.0",
     "permissions": [
