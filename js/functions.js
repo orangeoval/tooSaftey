@@ -2,7 +2,8 @@ function Tabject(id, url) {
     this.id = id;
     this.scheme = url.split('/')[0];
     this.host = url.split('/')[2];
-    this.secureUrl = url.replace(this.scheme, 'https:');
+    this.https_url = url.replace('http:', 'https:');
+    this.http_url = url.replace('https:', 'http:');
 }
 
 
@@ -52,14 +53,14 @@ function validateTabRedirect(tab) {
 
 function checkHttps(tab, redirects) {
     $.ajax({
-        url: tab.secureUrl,
+        url: tab.https_url,
         statusCode: {
             200: function() {
 
                 // Keep track of redirect to avoid https -> http loop
                 redirects[tab.id] = tab.host;
                 chrome.storage.local.set({'redirects': redirects});
-                redirectTabThroughHttps(tab.secureUrl, tab.id);
+                redirectTabThroughHttps(tab.https_url, tab.id);
             }
         }
     });
