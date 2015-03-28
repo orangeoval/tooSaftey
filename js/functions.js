@@ -36,6 +36,7 @@ function validateTabRedirect(tab) {
         } else {
 
             chrome.browserAction.setIcon({ path: '/img/icon_red.png' });
+
             if (redirects[tab.id] != tab.host) {
                 checkHttps(tab, redirects);
             } else {
@@ -83,24 +84,25 @@ function redirectTabThroughHttps(redirectUrl, tabId) {
 
 
 function showNotification(id) {
+
     chrome.storage.local.get(['tcount','show_notices'], function(result) {
+
+        // Get redirect count, increment if appropriate
+        if (result.tcount == undefined) {
+            var totalRedirectCount = 1;
+        } else {
+
+            if (id == 'redirect') {
+                result.tcount++;
+            }
+
+            var totalRedirectCount = result.tcount;
+        }
+
+        chrome.storage.local.set({'tcount': totalRedirectCount});
 
         // Only continue if 'Show notices' checkbox in popup is checked
         if (result.show_notices) {
-
-            // Get redirect count, increment if appropriate
-            if (result.tcount == undefined) {
-                var totalRedirectCount = 1;
-            } else {
-
-                if (id == 'redirect') {
-                    result.tcount++;
-                }
-
-                var totalRedirectCount = result.tcount;
-            }
-
-            chrome.storage.local.set({'tcount': totalRedirectCount});
 
             // Create notification
             if (id == 'redirect') {
